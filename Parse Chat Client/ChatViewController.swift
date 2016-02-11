@@ -9,15 +9,63 @@
 import UIKit
 import Parse
 
-class ChatViewController: UIViewController {
+class ChatViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     
+    @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var messageTextField: UITextField!
+    
+    var messages: [PFObject]!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        
+        getMessages()
+        
+        self.tableView.delegate = self
+        self.tableView.dataSource = self
+        
+        NSTimer.scheduledTimerWithTimeInterval(3, target: self, selector: "onRefresh", userInfo: nil, repeats: true)
+    }
+    
+    func onRefresh() {
+        getMessages()
+    }
+    
+    func getMessages() {
+        let query = PFQuery(className: "Message")
+        query.addDescendingOrder("createdAt")
+        query.includeKey("user")
+        query.findObjectsInBackgroundWithBlock {
+            (objects: [PFObject]?, error: NSError?) -> Void in
+            
+            if error == nil {
+                // The find succeeded.
+                print("Successfully retrieved \(objects!.count) scores.")
+                
+                self.messages = objects
+                self.tableView.reloadData()
+            } else {
+                // Log details of the failure
+                print("Error: \(error!) \(error!.userInfo)")
+            }
+        }
+    }
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("messageCell", forIndexPath: indexPath) as! MessageTableViewCell
+        cell.message = messages[indexPath.row]
+//        print("user = \(messages[indexPath.row]["user"]?.username)")
+        
+        return cell
+    }
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if let messages = messages {
+            return messages.count
+        }
+        
+        return 0
     }
 
     override func didReceiveMemoryWarning() {
@@ -29,10 +77,12 @@ class ChatViewController: UIViewController {
         
         let message = PFObject(className:"Message")
         message["text"] = messageTextField.text!
+        message["user"] = PFUser.currentUser()
+        print("current user = \(PFUser.currentUser()?.username!)")
         message.saveInBackgroundWithBlock {
             (success: Bool, error: NSError?) -> Void in
             if (success) {
-                print("Sent: \(message["text"])")
+                print("Sent: \(message["text"]) from \(message["user"].username!)")
             } else {
                 print("Error: \(error?.description)")
             }

@@ -60,8 +60,11 @@ class LoginViewController: UIViewController {
     
     
     @IBAction func loginAction(sender: AnyObject) {
+        print("logging in")
+
         PFUser.logInWithUsernameInBackground(usernameTextField.text!, password: passwordTextField.text!) {
             (user: PFUser?, error: NSError?) -> Void in
+            print("logging in")
             if user != nil {
                 // Do stuff after successful login.
                 self.transition()

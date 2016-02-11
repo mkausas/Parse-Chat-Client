@@ -22,8 +22,11 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         getMessages()
         
-        self.tableView.delegate = self
-        self.tableView.dataSource = self
+        tableView.delegate = self
+        tableView.dataSource = self
+        
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 120 // only for scroll bar estimation
         
         NSTimer.scheduledTimerWithTimeInterval(3, target: self, selector: "onRefresh", userInfo: nil, repeats: true)
     }

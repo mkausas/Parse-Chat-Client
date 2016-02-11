@@ -5,5 +5,6 @@ use_frameworks!
 
 target 'Parse Chat Client' do
 	pod 'Parse'
+	pod 'JVFloatLabeledTextField'
 end
 
